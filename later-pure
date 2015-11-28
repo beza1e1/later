@@ -14,8 +14,7 @@ _CONFIG_FILE_NAME="config"
 _DATA_DIR=".later"
 
 _CONFIG={
-    "default_priority": 2,
-    "username": "Metta Ong <ongspxm@gmail.com>"
+    "default_priority": 2
 }
 
 def error(msg):
@@ -320,12 +319,9 @@ def cmd_assign(args):
     if not args or len(args) < 2:
         error("need guid and assignee")
     guid = _HOOKS.be_complete_guid(args[0])
-    issue = _HOOKS.be_load_issue(guid)
-    
-    responsible = " ".join(args[1:])
-    if responsible=="ongspxm": responsible = "Metta Ong <ongspxm@gmail.com>"
+    issue = _HOOKS.be_load_issue(guid) 
+    issue.properties["responsible"] = " ".join(args[1:])
 
-    issue.properties["responsible"] = responsible
     _HOOKS.be_store_issue(issue)
 
 _USAGE = """\
@@ -373,8 +369,8 @@ def main():
         cmd_init(sys.argv[2:])
         return
     load_config()
-
-# e.g. "add" leads to calling "cmd_add"
+    
+    # e.g. "add" leads to calling "cmd_add"
     fun = _HOOKS.get("cmd_" + sys.argv[1], None)
     if not fun:
         error("Unknown command. Try 'help'.")
