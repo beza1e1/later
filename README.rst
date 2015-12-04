@@ -11,6 +11,9 @@ Clone the github repository git://github.com/beza1e1/later.git
 and use the ``later`` executable.
 Start with ``later help``.
 
+Default config available in ``config`` (found in same directory as
+the ``later`` executable.
+
 Philosphy
 ---------
 
@@ -22,4 +25,5 @@ More precisely:
  2. "**A** developer" means big project management is out of scope.
  3. Lots of shortcuts and defering for **lazy** devs like me.
  4. End users, managers and translators should use something else.
+
 

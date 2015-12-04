@@ -9,13 +9,13 @@ from glob import iglob
 from datetime import datetime
 from tempfile import mkstemp
 
-_PLUGINS_DIR="/".join(sys.argv[0].split("/")[:-1]) + "/plugins"
-_CONFIG_FILE_NAME="config"
-_DATA_DIR=".later"
+_SCRIPT_DIR = "/".join(sys.argv[0].split("/")[:-1]) 
+_PLUGINS_DIR = _SCRIPT_DIR + "/plugins"
+_CONFIG_FILE_NAME = "config"
+_DATA_DIR = ".later"
 
 _CONFIG={
-    "default_priority": 2,
-    "username": "Metta Ong <ongspxm@gmail.com>"
+    "default_piority": 2
 }
 
 def error(msg):
@@ -45,6 +45,7 @@ def find_config():
         if os.path.isdir(data) and os.path.isfile(config):
             return config
         current, trash = os.path.split(current)
+    return os.path.join(_SCRIPT_DIR, _CONFIG_FILE_NAME)
 
 @hooked
 def guess_username():
@@ -322,10 +323,7 @@ def cmd_assign(args):
     guid = _HOOKS.be_complete_guid(args[0])
     issue = _HOOKS.be_load_issue(guid)
     
-    responsible = " ".join(args[1:])
-    if responsible=="ongspxm": responsible = "Metta Ong <ongspxm@gmail.com>"
-
-    issue.properties["responsible"] = responsible
+    issue.properties["responsible"] = " ".join(args[1:])
     _HOOKS.be_store_issue(issue)
 
 _USAGE = """\
@@ -374,10 +372,10 @@ def main():
         return
     load_config()
 
-# e.g. "add" leads to calling "cmd_add"
+    # e.g. "add" leads to calling "cmd_add"
     fun = _HOOKS.get("cmd_" + sys.argv[1], None)
     if not fun:
-        error("Unknown command. Try 'help'.")
+        cmd_help()
     fun(sys.argv[2:])
 
 if __name__ == "__main__":
