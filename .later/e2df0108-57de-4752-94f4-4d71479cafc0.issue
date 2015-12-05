@@ -1,8 +1,9 @@
 status: closed
-responsible: ongspxm
-modified: 2015-12-04T14:45:12
 reporter: Andreas Zwinkau <beza1e1@web.de>
+responsible: ongspxm
+modified: 2015-12-05T11:53:36
 created: 2010-08-13T06:12:19
+revision: initial
 
 What to do on no-command-given?
 
