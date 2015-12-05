@@ -143,7 +143,7 @@ class Issue:
             i = None
         string = self.msg[:i]
         status = self.properties.get("status", "?")
-        return " %-50s\t(%s, %s)" % (string, status, self.guid[:8])
+        return " %s  %-50s %s"%(self.guid[:8], string, status) 
     def longString(self):
         """Multi line representation"""
         string = "%s\n" % (self.guid)
@@ -264,7 +264,7 @@ Examples:
     # Filtering for bugs
     if args.count('bugs'):
         issues = (iss for iss in issues if iss.msg[:3]=="bug")
-    args.remove('bugs')
+        args.remove('bugs')
 
     matcher = gen_matcher(args)
     for issue in issues:
