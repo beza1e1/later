@@ -114,6 +114,7 @@ def load_lfile(path):
 def store_lfile(path, msg, props):
     fh = open(path, 'w')
     for key,val in props.items():
+        if not val: continue
         fh.write("%s: %s\n" % (key,val))
     fh.write("\n")
     fh.write(msg)
@@ -151,7 +152,7 @@ class Issue:
         string += "\n" + self.msg
         return string
 
-# explicitly not @hooked, since backend specific
+## Not hooked, for backend only
 def be_gen_path(guid):
     return os.path.join(_CONFIG.get("data_dir", ""), guid + ".issue")
 
@@ -193,6 +194,10 @@ def be_delete_issue(guid):
     assert len(guid) == 36
     path = be_gen_path(guid)
     os.remove(path)
+
+@hooked
+def be_get_data_dir():
+    return _CONFIG.get("data_dir", "")
 
 # explicitly not @hooked, since now plugins available at this point
 def cmd_init(args):
@@ -244,17 +249,28 @@ def gen_matcher(args):
 
 @hooked
 def cmd_list(args):
-    """By default lists all issues, which are not closed.
+    """
+By default lists all issues, which are not closed.
 Search terms can be given, then only issues where all search terms match the issue properties.
-For example `list status=closed` shows all issues with status closed.
-`list reporter!=beza1e1 status=confirmed` shows all confirmed issues not reported by beza1e1."""
+
+Examples:
+- `list status=closed` shows all issues with status closed.
+- `list reporter!=beza1e1 status=confirmed` shows all confirmed issues not reported by beza1e1.
+- `list bugs` shows issues beginning with "bug:"
+    """
+    
+    issues = (_HOOKS.be_load_issue(guid) for guid in _HOOKS.be_all_guids())
+
+    # Filtering for bugs
+    if args.count('bugs'):
+        issues = (iss for iss in issues if iss.msg[:3]=="bug")
+    args.remove('bugs')
+
     matcher = gen_matcher(args)
-    for guid in _HOOKS.be_all_guids():
-        issue = _HOOKS.be_load_issue(guid)
+    for issue in issues:
         # if args specified search in properties,
         # otherwise list all issues not closed.
-        if matcher(issue):
-            print issue.shortString()
+        if matcher(issue): print issue.shortString()
 
 @hooked
 def cmd_edit(args):
@@ -352,7 +368,7 @@ list-subdirs                show issue list of subdirs
 """ % (sys.argv[0])
 
 @hooked
-def cmd_help(args):
+def cmd_help(args=[]):
     """Provides general usage and help for every command."""
     if len(args) == 0:
         print _USAGE
@@ -366,7 +382,8 @@ def cmd_help(args):
 
 def main():
     if len(sys.argv) <= 1:
-        error("No command given. Try 'help'.")
+        return cmd_help()
+
     if sys.argv[1] == "init":
         cmd_init(sys.argv[2:])
         return
@@ -374,8 +391,10 @@ def main():
 
     # e.g. "add" leads to calling "cmd_add"
     fun = _HOOKS.get("cmd_" + sys.argv[1], None)
-    if not fun:
-        cmd_help()
+    if not fun: 
+        return _HOOKS.cmd_help()
+    print
+    
     fun(sys.argv[2:])
 
 if __name__ == "__main__":
